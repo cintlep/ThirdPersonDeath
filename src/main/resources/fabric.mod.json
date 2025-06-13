@@ -1,0 +1,34 @@
+{
+	"schemaVersion": 1,
+	"id": "tpdeath",
+	"version": "${version}",
+	"name": "Third Person Death",
+	"description": "Bedrock-styled cinematic death camera for Java",
+	"authors": [
+		"cintlex"
+	],
+	"contact": {
+		"sources": "https://github.com/cintlep/ThirdPersonDeath",
+		"issues": "https://github.com/cintlep/ThirdPersonDeath/issues"
+	},
+	"license": "MIT",
+	"icon": "assets/tpdeath/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"com.cintlex.tpdeath.ThirdPersonDeath"
+		]
+	},
+	"mixins": [
+		"tpdeath.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.16.14",
+		"minecraft": ">=1.21.6-",
+		"java": ">=21",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+}

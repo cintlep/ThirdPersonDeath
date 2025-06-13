@@ -1,0 +1,13 @@
+{
+	"required": true,
+	"package": "com.cintlex.tpdeath.mixin",
+	"refmap": "tpdeath.refmap.json",
+	"compatibilityLevel": "JAVA_21",
+	"mixins": [
+		"DeathScreenMixin",
+		"GameRendererMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}
