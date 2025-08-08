@@ -1,4 +1,4 @@
-# ThirdPersonDeath
-A Bedrock-styled cinematic death camera for Java! This mod applies a walter white zoom out effect when the player dies. Pretty similar to the Bedrock Edition screen, just without the fading buttons. Works client sided and keeps the java snappiness!
+# Info
+Third Person Death modifies the players death camera to switch to the third person back perspective and slowly start zooming out until you respawn. This closely mimics Minecraft: Bedrock Edition behavior, just with your usual java edition button layout.
 
-![mod](https://github.com/user-attachments/assets/f3681be3-4410-45a2-aec8-bf6eb9c8f94c)
+The mod works completely client sided and requires no additional setup. Its lightweight nature allows it to be compatible through multiple updates. This mod has 0 effect on game performance.
