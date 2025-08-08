@@ -1,0 +1,15 @@
+{
+	"required": true,
+	"package": "cintlex.thirdpersondeath.mixin",
+	"compatibilityLevel": "JAVA_17",
+	"mixins": [
+		"tpdfov",
+		"tpdminecraft"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"overwrites": {
+		"requireAnnotations": true
+	}
+}
