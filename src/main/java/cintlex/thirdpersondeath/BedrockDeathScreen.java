@@ -41,13 +41,13 @@ public class BedrockDeathScreen extends Screen {
                 : Component.literal("Respawn");
 
         Button respawnBtn = Button.builder(respawnText, this::onRespawn)
-                .bounds(this.width / 2 - 100, this.height / 4 + 72, 200, 20)
+                .bounds(this.width / 2 - 100, this.height / 4 + 100, 200, 20)
                 .build();
         this.addRenderableWidget(respawnBtn);
         this.exitButtons.add(respawnBtn);
 
         this.exitToTitleButton = Button.builder(Component.literal("Main Menu"), this::onExitToTitle)
-                .bounds(this.width / 2 - 100, this.height / 4 + 96, 200, 20)
+                .bounds(this.width / 2 - 100, this.height / 4 + 124, 200, 20)
                 .build();
         this.addRenderableWidget(this.exitToTitleButton);
         this.exitButtons.add(this.exitToTitleButton);
