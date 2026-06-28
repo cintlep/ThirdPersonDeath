@@ -3,6 +3,7 @@ package cintlex.thirdpersondeath;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.ActiveTextCollector;
 import net.minecraft.client.gui.TextAlignment;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -21,6 +22,10 @@ public class BedrockDeathScreen extends Screen {
     private int btn1X, btn1Y, btn1W, btn1H;
     private int btn2X, btn2Y, btn2W, btn2H;
     private boolean buttonsActive = false;
+    private long uiFadeStart = 0;
+    private boolean buttonsAdded = false;
+
+    private static final long FADE_START_DELAY_MS = 1000; // reduced delay before UI fade in starts
 
     public BedrockDeathScreen(Component causeOfDeath, boolean hardcore) {
         super(Component.translatable(hardcore ? "deathScreen.title.hardcore" : "deathScreen.title"));
@@ -37,14 +42,22 @@ public class BedrockDeathScreen extends Screen {
         int bw = 200;
         int bh = 20;
         int cx = this.width / 2;
-        int baseY = this.height / 4;
+        int baseY = this.height - 85; // slightly above the hunger bar
 
-        this.btn1X = cx - bw / 2; this.btn1Y = baseY + 95; this.btn1W = bw; this.btn1H = bh;
-        this.btn2X = cx - bw / 2; this.btn2Y = baseY + 120; this.btn2W = bw; this.btn2H = bh;
+        this.btn1X = cx - bw / 2; this.btn1Y = baseY; this.btn1W = bw; this.btn1H = bh;
+        this.btn2X = cx - bw / 2; this.btn2Y = baseY + 25; this.btn2W = bw; this.btn2H = bh;
     }
 
     private void doRespawn() {
-        if (this.minecraft != null && this.minecraft.player != null) {
+        if (this.minecraft != null && this.minecraft.getConnection() != null) {
+            // Proper way: send the respawn command packet (like vanilla DeathScreen)
+            this.minecraft.getConnection().send(
+                new net.minecraft.network.protocol.game.ServerboundClientCommandPacket(
+                    net.minecraft.network.protocol.game.ServerboundClientCommandPacket.Action.PERFORM_RESPAWN
+                )
+            );
+        } else if (this.minecraft != null && this.minecraft.player != null) {
+            // Fallback
             this.minecraft.player.respawn();
         }
     }
@@ -61,25 +74,26 @@ public class BedrockDeathScreen extends Screen {
     @Override
     public void tick() {
         super.tick();
-        this.delayTicker++;
-        if (this.delayTicker == 20) {
-            this.buttonsActive = true;
+        if (this.uiFadeStart == 0) {
+            this.uiFadeStart = System.currentTimeMillis();
+        }
+        // Add vanilla buttons after delay (for text and clicks)
+        if (this.uiFadeStart > 0 && !this.buttonsAdded) {
+            long elapsed = System.currentTimeMillis() - this.uiFadeStart;
+            if (elapsed > FADE_START_DELAY_MS) {
+                Component respawnButtonText = this.hardcore 
+                    ? Component.translatable("deathScreen.spectate")
+                    : Component.literal("Respawn");
+                this.addRenderableWidget(Button.builder(respawnButtonText, b -> doRespawn()).bounds(this.btn1X, this.btn1Y, this.btn1W, this.btn1H).build());
+                this.addRenderableWidget(Button.builder(Component.literal("Game menu"), b -> doExitToTitle()).bounds(this.btn2X, this.btn2Y, this.btn2W, this.btn2H).build());
+                this.buttonsAdded = true;
+                this.buttonsActive = true; // enable for any manual if needed
+            }
         }
     }
 
     @Override
     public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick) {
-        if (!buttonsActive) return super.mouseClicked(event, doubleClick);
-        double mx = event.x();
-        double my = event.y();
-        if (isInside(mx, my, btn1X, btn1Y, btn1W, btn1H)) {
-            doRespawn();
-            return true;
-        }
-        if (isInside(mx, my, btn2X, btn2Y, btn2W, btn2H)) {
-            doExitToTitle();
-            return true;
-        }
         return super.mouseClicked(event, doubleClick);
     }
 
@@ -90,7 +104,7 @@ public class BedrockDeathScreen extends Screen {
     @Override
     public void extractBackground(GuiGraphicsExtractor gfx, int mouseX, int mouseY, float partialTick) {
         extractDeathBackground(gfx, this.width, this.height);
-        drawDarkButtons(gfx);
+        // Vanilla buttons - no custom drawing (texture packs can override colors)
     }
 
     private static void extractDeathBackground(GuiGraphicsExtractor gfx, int w, int h) {
@@ -102,18 +116,6 @@ public class BedrockDeathScreen extends Screen {
         gfx.fillGradient(0, h - 70, w, h, 0, red);
         gfx.fillGradient(0, 0, 55, h, red, 0);
         gfx.fillGradient(w - 55, 0, w, h, 0, red);
-    }
-
-    /** Draw darker ore-ui style button backgrounds (solid dark for reliability; texture blits can be refined). */
-    private void drawDarkButtons(GuiGraphicsExtractor gfx) {
-        int dark = 0xFF2F2F2F;
-        int borderDark = 0xFF1A1A1A;
-        // respawn
-        gfx.fill(btn1X-2, btn1Y-2, btn1X+btn1W+2, btn1Y+btn1H+2, borderDark);
-        gfx.fill(btn1X, btn1Y, btn1X+btn1W, btn1Y+btn1H, dark);
-        // game menu
-        gfx.fill(btn2X-2, btn2Y-2, btn2X+btn2W+2, btn2Y+btn2H+2, borderDark);
-        gfx.fill(btn2X, btn2Y, btn2X+btn2W, btn2Y+btn2H, dark);
     }
 
     @Override
@@ -128,26 +130,31 @@ public class BedrockDeathScreen extends Screen {
         ActiveTextCollector.Parameters base = collector.defaultParameters();
         int cx = this.width / 2;
 
-        // "YOU DIED!" using custom bold-ish font from minecraft-ten.ttf (only for title)
-        Component title = Component.literal("YOU DIED!")
-            .setStyle(Style.EMPTY.withFont(new net.minecraft.network.chat.FontDescription.Resource(Identifier.fromNamespaceAndPath("thirdpersondeath", "death_title"))));
-        collector.defaultParameters(base.withScale(TITLE_SCALE));
-        collector.accept(TextAlignment.CENTER, cx / 2, 28, title);
+        // Show title and subtitle after the delay (classic fade-in by delayed appearance, no scale animation)
+        if (this.uiFadeStart > 0) {
+            long elapsed = System.currentTimeMillis() - this.uiFadeStart;
+            if (elapsed > FADE_START_DELAY_MS) {
+                // Title full scale, centered
+                Component titleComp = this.hardcore
+                    ? Component.translatable("deathScreen.title.hardcore")
+                        .setStyle(Style.EMPTY.withFont(new net.minecraft.network.chat.FontDescription.Resource(Identifier.fromNamespaceAndPath("thirdpersondeath", "death_title"))))
+                    : Component.literal("YOU DIED!")
+                        .setStyle(Style.EMPTY.withFont(new net.minecraft.network.chat.FontDescription.Resource(Identifier.fromNamespaceAndPath("thirdpersondeath", "death_title"))));
+                collector.defaultParameters(base.withScale(TITLE_SCALE));
+                collector.accept(TextAlignment.CENTER, cx / 2, 30, titleComp);
 
-        // Reset scale for subtitle
-        collector.defaultParameters(base);
+                // Reset parameters after scaled title
+                collector.defaultParameters(base);
 
-        // Cause of death as subtitle (positioned like Bedrock)
-        if (this.causeOfDeath != null) {
-            collector.accept(TextAlignment.CENTER, cx, 82, this.causeOfDeath);
+                // Subtitle together with title, positioned properly below (not overlaying)
+                if (this.causeOfDeath != null) {
+                    collector.accept(TextAlignment.CENTER, cx, 82, this.causeOfDeath);
+                }
+            }
         }
 
-        // Button labels drawn on top of the dark rects we drew in background (ore-ui dark style)
-        if (buttonsActive || delayTicker > 5) {
-            // center text vertically inside 20px tall bars
-            collector.accept(TextAlignment.CENTER, cx, btn1Y + 5, Component.literal("Respawn"));
-            collector.accept(TextAlignment.CENTER, cx, btn2Y + 5, Component.literal("Game menu"));
-        }
+        // Button labels are provided by the vanilla Button widgets (added after delay)
+        // No collector for button text
     }
 
     @Override

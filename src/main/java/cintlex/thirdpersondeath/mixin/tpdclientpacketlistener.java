@@ -21,11 +21,23 @@ public class tpdclientpacketlistener {
                 hardcore = client.level.getLevelData().isHardcore();
             }
             if (client.player != null && !client.player.shouldShowDeathScreen()) {
-                client.player.respawn();
+                if (client.getConnection() != null) {
+                    client.getConnection().send(
+                        new net.minecraft.network.protocol.game.ServerboundClientCommandPacket(
+                            net.minecraft.network.protocol.game.ServerboundClientCommandPacket.Action.PERFORM_RESPAWN
+                        )
+                    );
+                } else {
+                    client.execute(() -> {
+                        if (client.player != null) client.player.respawn();
+                    });
+                }
                 ci.cancel();
                 return;
             }
-            client.setScreen(new BedrockDeathScreen(packet.message(), hardcore));
+            final var deathMessage = packet.message();
+            final boolean isHardcore = hardcore;
+            client.execute(() -> client.setScreen(new BedrockDeathScreen(deathMessage, isHardcore)));
             ci.cancel();
         }
     }

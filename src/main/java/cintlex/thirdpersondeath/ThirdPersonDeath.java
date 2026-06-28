@@ -32,17 +32,25 @@ public class ThirdPersonDeath implements ClientModInitializer {
 	public static boolean isZoom() {return zoom;}
 	public static float zoomprogress() {if (!zoom || DeathTime == 0) {return 0.0f;}
 		long time = System.currentTimeMillis(); long passed = time - DeathTime; float seconds = passed / 1000.0f;
-		if (seconds >= 18.0f) {return 1.0f;}
-		float progress = seconds / 18.0f; if (progress <= (8.57f / 18.0f)) {return progress * (18.0f / 8.57f) * 0.9f;}
-		else {float smoothout = (progress - (8.57f / 18.0f)) / (1.43f / 18.0f); float end = 1.0f - (float) Math.pow(1.0f - smoothout, 2.0f); return 0.9f + (0.1f * end);}
+		if (seconds >= 30.0f) {return 1.0f;}
+		float progress = seconds / 30.0f; if (progress <= (8.57f / 30.0f)) {return progress * (30.0f / 8.57f) * 0.9f;}
+		else {float smoothout = (progress - (8.57f / 30.0f)) / (1.43f / 30.0f); float end = 1.0f - (float) Math.pow(1.0f - smoothout, 2.0f); return 0.9f + (0.1f * end);}
 	}
 
 	/** Cinematic camera tilt (degrees) that eases in and holds, matching Bedrock death cam lean. */
 	public static float getTilt() {
 		if (!zoom || DeathTime == 0) return 0.0f;
 		float p = zoomprogress();
-		// ease in a nice lean and hold around 10-12 degrees
-		float tilt = Math.min(p, 0.85f) / 0.85f;
-		return tilt * 11.0f;
+		// use full duration for longer tilt, more overall
+		return p * 30.0f; // 30 degrees max, ramps over full 30s
+	}
+
+	/** Distance to pull the camera back from the eye for smooth 1p -> 3p transition (zoom out effect). */
+	public static float deathCamDist() {
+		if (!zoom || DeathTime == 0) return 0.0f;
+		float p = zoomprogress();
+		// pull back quickly in first ~4s to max ~4 blocks, then hold
+		float pullP = Math.min(p * (25f / 4f), 1.0f);
+		return pullP * 4.0f;
 	}
 }

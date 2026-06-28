@@ -6,8 +6,7 @@
 	"client": [
 		"tpdfov",
 		"tpdminecraft",
-		"tpdclientpacketlistener",
-		"tpdlocalplayer"
+		"tpdclientpacketlistener"
 	],
 	"injectors": {
 		"defaultRequire": 1
