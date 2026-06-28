@@ -36,4 +36,13 @@ public class ThirdPersonDeath implements ClientModInitializer {
 		float progress = seconds / 10.0f; if (progress <= (8.57f / 10.0f)) {return progress * (10.0f / 8.57f) * 0.9f;}
 		else {float smoothout = (progress - (8.57f / 10.0f)) / (1.43f / 10.0f); float end = 1.0f - (float) Math.pow(1.0f - smoothout, 2.0f); return 0.9f + (0.1f * end);}
 	}
+
+	/** Cinematic camera tilt (degrees) that eases in and holds, matching Bedrock death cam lean. */
+	public static float getTilt() {
+		if (!zoom || DeathTime == 0) return 0.0f;
+		float p = zoomprogress();
+		// ease in a nice lean and hold around 10-12 degrees
+		float tilt = Math.min(p, 0.85f) / 0.85f;
+		return tilt * 11.0f;
+	}
 }
