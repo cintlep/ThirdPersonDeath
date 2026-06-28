@@ -3,16 +3,23 @@ import net.fabricmc.api.ClientModInitializer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.gui.screens.DeathScreen;
+import net.minecraft.client.gui.screens.Screen;
+import cintlex.thirdpersondeath.BedrockDeathScreen;
 
 public class ThirdPersonDeath implements ClientModInitializer {
 	private static boolean deathscreen = false; private static CameraType playerperspective = null; private static long DeathTime = 0; private static boolean zoom = false;
 	@Override
 	public void onInitializeClient() {}
-	public static void detectscreen() {Minecraft client = Minecraft.getInstance(); if (client.screen instanceof DeathScreen) {if (!deathscreen) {screenisdeath(client);}
+	public static void detectscreen() {Minecraft client = Minecraft.getInstance(); if (isDeathScreen(client.screen)) {if (!deathscreen) {screenisdeath(client);}
 		deathscreen = true;
 	} else {if (deathscreen) {screenisnotdeath(client);}
 		deathscreen = false;
 	}
+	}
+
+	private static boolean isDeathScreen(Screen screen) {
+		if (screen instanceof DeathScreen) return true;
+		return screen instanceof BedrockDeathScreen;
 	}
 	private static void screenisdeath(Minecraft client) {playerperspective = client.options.getCameraType(); client.options.setCameraType(CameraType.THIRD_PERSON_BACK); DeathTime = System.currentTimeMillis();
 		zoom = true;

@@ -3,7 +3,7 @@
 	"id": "thirdpersondeath",
 	"version": "${version}",
 	"name": "Third Person Death",
-	"description": "Bedrock-styled cinematic death camera for Java Edition.",
+	"description": "Bedrock-styled cinematic death camera + You Died screen with cause of death for Java Edition.",
 	"authors": [
 		"cintlex"
 	],
