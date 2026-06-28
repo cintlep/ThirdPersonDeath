@@ -7,6 +7,8 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.resources.Identifier;
 
 public class BedrockDeathScreen extends Screen {
     private static final int TITLE_SCALE = 2;
@@ -102,16 +104,16 @@ public class BedrockDeathScreen extends Screen {
         gfx.fillGradient(w - 55, 0, w, h, 0, red);
     }
 
-    /** Draw the darker ore-ui style button backgrounds (called from background extraction). */
+    /** Draw darker ore-ui style button backgrounds (solid dark for reliability; texture blits can be refined). */
     private void drawDarkButtons(GuiGraphicsExtractor gfx) {
-        int dark = 0xFF3A3A3A;      // dark gray like Bedrock ore-ui
-        int border = 0xFF1F1F1F;
-        // Button 1 (Respawn)
-        gfx.fill(btn1X - 1, btn1Y - 1, btn1X + btn1W + 1, btn1Y + btn1H + 1, border);
-        gfx.fill(btn1X, btn1Y, btn1X + btn1W, btn1Y + btn1H, dark);
-        // Button 2 (Game menu)
-        gfx.fill(btn2X - 1, btn2Y - 1, btn2X + btn2W + 1, btn2Y + btn2H + 1, border);
-        gfx.fill(btn2X, btn2Y, btn2X + btn2W, btn2Y + btn2H, dark);
+        int dark = 0xFF2F2F2F;
+        int borderDark = 0xFF1A1A1A;
+        // respawn
+        gfx.fill(btn1X-2, btn1Y-2, btn1X+btn1W+2, btn1Y+btn1H+2, borderDark);
+        gfx.fill(btn1X, btn1Y, btn1X+btn1W, btn1Y+btn1H, dark);
+        // game menu
+        gfx.fill(btn2X-2, btn2Y-2, btn2X+btn2W+2, btn2Y+btn2H+2, borderDark);
+        gfx.fill(btn2X, btn2Y, btn2X+btn2W, btn2Y+btn2H, dark);
     }
 
     @Override
@@ -126,8 +128,9 @@ public class BedrockDeathScreen extends Screen {
         ActiveTextCollector.Parameters base = collector.defaultParameters();
         int cx = this.width / 2;
 
-        // "YOU DIED!" in a distinct style (larger scale) so it stands out from the subtitle like Bedrock
-        net.minecraft.network.chat.MutableComponent title = Component.literal("YOU DIED!");
+        // "YOU DIED!" using custom bold-ish font from minecraft-ten.ttf (only for title)
+        Component title = Component.literal("YOU DIED!")
+            .setStyle(Style.EMPTY.withFont(new net.minecraft.network.chat.FontDescription.Resource(Identifier.fromNamespaceAndPath("thirdpersondeath", "death_title"))));
         collector.defaultParameters(base.withScale(TITLE_SCALE));
         collector.accept(TextAlignment.CENTER, cx / 2, 28, title);
 

@@ -31,9 +31,9 @@ public class tpdfov {
 	private void applyCinematicDeathTilt(float originalYRot, float originalXRot, CallbackInfo ci) {
 		if (ThirdPersonDeath.isZoom() && detached) {
 			float tilt = ThirdPersonDeath.getTilt();
-			// Slow yaw drift + slight extra downward pitch for a nice "cinematic held tilt"
-			this.yRot += tilt * 0.9f;
-			this.xRot += tilt * 0.25f;
+			// Yaw + pitch drift
+			this.yRot += tilt * 0.85f;
+			this.xRot += tilt * 0.2f;
 		}
 	}
 }
